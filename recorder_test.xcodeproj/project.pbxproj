@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		142677F714CA3D59006E9A71 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 142677F614CA3D59006E9A71 /* main.cpp */; };
 		142677F914CA3D59006E9A71 /* recorder_test.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 142677F814CA3D59006E9A71 /* recorder_test.1 */; };
+		1426780614CA3E8F006E9A71 /* libopencv_core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1426780314CA3E8F006E9A71 /* libopencv_core.dylib */; };
+		1426780714CA3E8F006E9A71 /* libopencv_highgui.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1426780414CA3E8F006E9A71 /* libopencv_highgui.dylib */; };
+		1426780814CA3E8F006E9A71 /* libopencv_imgproc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1426780514CA3E8F006E9A71 /* libopencv_imgproc.dylib */; };
+		1426780B14CA3ED1006E9A71 /* config.xml in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1426780A14CA3ECC006E9A71 /* config.xml */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -22,12 +26,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		1426780914CA3EA9006E9A71 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				1426780B14CA3ED1006E9A71 /* config.xml in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		142677F214CA3D58006E9A71 /* recorder_test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = recorder_test; sourceTree = BUILT_PRODUCTS_DIR; };
 		142677F614CA3D59006E9A71 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		142677F814CA3D59006E9A71 /* recorder_test.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = recorder_test.1; sourceTree = "<group>"; };
+		1426780314CA3E8F006E9A71 /* libopencv_core.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_core.dylib; path = usr/local/lib/libopencv_core.dylib; sourceTree = SDKROOT; };
+		1426780414CA3E8F006E9A71 /* libopencv_highgui.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_highgui.dylib; path = usr/local/lib/libopencv_highgui.dylib; sourceTree = SDKROOT; };
+		1426780514CA3E8F006E9A71 /* libopencv_imgproc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.dylib; path = usr/local/lib/libopencv_imgproc.dylib; sourceTree = SDKROOT; };
+		1426780A14CA3ECC006E9A71 /* config.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +53,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1426780614CA3E8F006E9A71 /* libopencv_core.dylib in Frameworks */,
+				1426780714CA3E8F006E9A71 /* libopencv_highgui.dylib in Frameworks */,
+				1426780814CA3E8F006E9A71 /* libopencv_imgproc.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,6 +65,9 @@
 		142677E714CA3D58006E9A71 = {
 			isa = PBXGroup;
 			children = (
+				1426780314CA3E8F006E9A71 /* libopencv_core.dylib */,
+				1426780414CA3E8F006E9A71 /* libopencv_highgui.dylib */,
+				1426780514CA3E8F006E9A71 /* libopencv_imgproc.dylib */,
 				142677F514CA3D59006E9A71 /* recorder_test */,
 				142677F314CA3D58006E9A71 /* Products */,
 			);
@@ -60,6 +84,7 @@
 		142677F514CA3D59006E9A71 /* recorder_test */ = {
 			isa = PBXGroup;
 			children = (
+				1426780A14CA3ECC006E9A71 /* config.xml */,
 				142677F614CA3D59006E9A71 /* main.cpp */,
 				142677F814CA3D59006E9A71 /* recorder_test.1 */,
 			);
@@ -76,6 +101,7 @@
 				142677EE14CA3D58006E9A71 /* Sources */,
 				142677EF14CA3D58006E9A71 /* Frameworks */,
 				142677F014CA3D58006E9A71 /* CopyFiles */,
+				1426780914CA3EA9006E9A71 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -173,6 +199,17 @@
 		142677FD14CA3D59006E9A71 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/include/ni/,
+					/usr/include/nite/,
+				);
+				OTHER_LDFLAGS = (
+					/usr/lib/libOpenNI.dylib,
+					/usr/lib/libXnVNite_1_5_2.dylib,
+					/usr/lib/libXnVHandGenerator_1_5_2.dylib,
+					/usr/lib/libXnVFeatures_1_5_2.dylib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -180,6 +217,17 @@
 		142677FE14CA3D59006E9A71 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
+				HEADER_SEARCH_PATHS = (
+					/usr/include/ni/,
+					/usr/include/nite/,
+				);
+				OTHER_LDFLAGS = (
+					/usr/lib/libOpenNI.dylib,
+					/usr/lib/libXnVNite_1_5_2.dylib,
+					/usr/lib/libXnVHandGenerator_1_5_2.dylib,
+					/usr/lib/libXnVFeatures_1_5_2.dylib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
