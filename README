@@ -1,0 +1,1 @@
+このサンプルはKinectセンサーからの入力をファイルに保存して、再生するものです。main.cpp::mainの以下のフラグを設定して、保存、再生を指定できます。 bUseRecordData  (True:指定された.oniファイルを読み込んで再生します) bRecordData (False:Kinectセンサーからの入力を保存します)    

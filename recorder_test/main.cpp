@@ -1,19 +1,13 @@
 /****************************************************************************
  *                                                                           *
- *  OpenNI 1.x Alpha                                                         *
- *  Copyright (C) 2011 PrimeSense Ltd.                                       *
+ *   Recorder Test                                                           *
  *                                                                           *
- *  This file is part of OpenNI.                                             *
+ *  This project is a sample of recording and playing.                       *
  *                                                                           *
- *  OpenNI is free software: you can redistribute it and/or modify           *
+ *  this is free software: you can redistribute it and/or modify             *
  *  it under the terms of the GNU Lesser General Public License as published *
  *  by the Free Software Foundation, either version 3 of the License, or     *
  *  (at your option) any later version.                                      *
- *                                                                           *
- *  OpenNI is distributed in the hope that it will be useful,                *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the             *
- *  GNU Lesser General Public License for more details.                      *
  *                                                                           *
  *  You should have received a copy of the GNU Lesser General Public License *
  *  along with OpenNI. If not, see <http://www.gnu.org/licenses/>.           *
@@ -35,7 +29,7 @@
 //---------------------------------------------------------------------------
 #define CONFIG_XML_PATH "./config.xml"
 #define RECORD_FILE_PATH "../../skeletonrec.oni"
-#define MAX_NUM_USERS 15
+#define MAX_NUM_USERS 10
 
 //---------------------------------------------------------------------------
 // Globals
@@ -299,7 +293,7 @@ int main(int argc, char **argv)
     }
 
     xn::Recorder recorder;
-    if( bRecordData ){
+    if( bRecordData && !bUseRecordData ){
         // レコーダーの作成
         LOG_I("%s", "Setup Recorder");
         nRetVal = recorder.Create(g_Context);
@@ -321,7 +315,7 @@ int main(int argc, char **argv)
     while (!xnOSWasKeyboardHit())
     {
         g_Context.WaitOneUpdateAll(g_UserGenerator);
-        if( bRecordData ){
+        if( bRecordData  && !bUseRecordData ){
             nRetVal = recorder.Record();
             CHECK_RC(nRetVal, "Record");
         }
@@ -338,6 +332,7 @@ int main(int argc, char **argv)
         nUsers=MAX_NUM_USERS;
         g_UserGenerator.GetUsers(aUsers, nUsers);
 
+/*
         for(XnUInt16 i=0; i<nUsers; i++)
         {
             if(g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i])==FALSE)
@@ -351,9 +346,8 @@ int main(int argc, char **argv)
             // 最初の一人だけスケルトン表示する
             break;
         }
-        
+*/
         // ESCもしくはqが押されたら終了させる
-//        char key = cvWaitKey(10);
         if (cvWaitKey(10) == 27) {
             break;
         }
