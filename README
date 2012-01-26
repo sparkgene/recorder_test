@@ -1,1 +1,11 @@
-このサンプルはKinectセンサーからの入力をファイルに保存して、再生するものです。main.cpp::mainの以下のフラグを設定して、保存、再生を指定できます。 bUseRecordData  (True:指定された.oniファイルを読み込んで再生します) bRecordData (False:Kinectセンサーからの入力を保存します)    
+このサンプルはKinectセンサーからの入力をファイルに保存して、再生するものです。
+main.cpp::mainの以下のフラグを設定して、保存、再生を指定できます。
+ bUseRecordData  (True:指定された.oniファイルを読み込んで再生します)
+ bRecordData (False:Kinectセンサーからの入力を保存します)
+
+動作環境
+OpenNI 1.5.2.23
+Nite 1.5.2.21
+PrimeSense Sensor 5.1.0.41
+
+
