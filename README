@@ -11,4 +11,5 @@ PrimeSense Sensor 5.1.0.41
 OpenNIのサイトからサンプルのoniファイルをダウンロードして指定すれば、
 Kinectセンサーがなくても、サンプルを動かすことができます。
 
+This is a sample for redording kinect sensor data and play it.
 
