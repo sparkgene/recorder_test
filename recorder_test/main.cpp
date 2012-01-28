@@ -4,14 +4,6 @@
  *                                                                           *
  *  This project is a sample of recording and playing.                       *
  *                                                                           *
- *  this is free software: you can redistribute it and/or modify             *
- *  it under the terms of the GNU Lesser General Public License as published *
- *  by the Free Software Foundation, either version 3 of the License, or     *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  You should have received a copy of the GNU Lesser General Public License *
- *  along with OpenNI. If not, see <http://www.gnu.org/licenses/>.           *
- *                                                                           *
  ****************************************************************************/
 //---------------------------------------------------------------------------
 // Includes
@@ -66,8 +58,7 @@ CvScalar g_Colors[] =
 // Macro
 //---------------------------------------------------------------------------
 #define CHECK_RC(nRetVal, what) \
-if (nRetVal != XN_STATUS_OK)    \
-{   \
+if (nRetVal != XN_STATUS_OK){   \
 printf("%s failed: %s\n", what, xnGetStatusString(nRetVal));    \
 return nRetVal; \
 }
@@ -103,39 +94,33 @@ printf("\n"); \
 //---------------------------------------------------------------------------
 using namespace xn;
 
-XnBool fileExists(const char *fn)
-{
+XnBool fileExists(const char *fn){
 	XnBool exists;
 	xnOSDoesFileExist(fn, &exists);
 	return exists;
 }
 
 // Callback: New user was detected
-void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
-{
+void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie){
     XnUInt32 epochTime = 0;
     xnOSGetEpochTime(&epochTime);
     LOG_D("%d New User %d", epochTime, nId);
     // New user found
-    if (g_bNeedPose)
-    {
+    if (g_bNeedPose){
         g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(g_strPose, nId);
     }
-    else
-    {
+    else{
         g_SkeletonCap.RequestCalibration(nId, TRUE);
     }
 }
 // Callback: An existing user was lost
-void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie)
-{
+void XN_CALLBACK_TYPE User_LostUser(xn::UserGenerator& generator, XnUserID nId, void* pCookie){
     XnUInt32 epochTime = 0;
     xnOSGetEpochTime(&epochTime);
     LOG_D("%d Lost user %d", epochTime, nId);	
 }
 // Callback: Detected a pose
-void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capability, const XnChar* strPose, XnUserID nId, void* pCookie)
-{
+void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capability, const XnChar* strPose, XnUserID nId, void* pCookie){
     XnUInt32 epochTime = 0;
     xnOSGetEpochTime(&epochTime);
     LOG_D("%d Pose %s detected for user %d", epochTime, strPose, nId);
@@ -143,46 +128,39 @@ void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capabil
     g_SkeletonCap.RequestCalibration(nId, TRUE);
 }
 // Callback: Started calibration
-void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie)
-{
+void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie){
     XnUInt32 epochTime = 0;
     xnOSGetEpochTime(&epochTime);
     LOG_D("%d Calibration started for user %d", epochTime, nId);
 }
 
-void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability& capability, XnUserID nId, XnCalibrationStatus eStatus, void* pCookie)
-{
+void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability& capability, XnUserID nId, XnCalibrationStatus eStatus, void* pCookie){
+
     XnUInt32 epochTime = 0;
     xnOSGetEpochTime(&epochTime);
-    if (eStatus == XN_CALIBRATION_STATUS_OK)
-    {
+    if (eStatus == XN_CALIBRATION_STATUS_OK){
         // Calibration succeeded
         LOG_D("%d Calibration complete, start tracking user %d", epochTime, nId);		
         g_SkeletonCap.StartTracking(nId);
     }
-    else
-    {
+    else{
         // Calibration failed
         LOG_D("%d Calibration failed for user %d\n", epochTime, nId);
-        if(eStatus==XN_CALIBRATION_STATUS_MANUAL_ABORT)
-        {
+        if(eStatus==XN_CALIBRATION_STATUS_MANUAL_ABORT){
             LOG_D("%s", "Manual abort occured, stop attempting to calibrate!");
             return;
         }
-        if (g_bNeedPose)
-        {
+        if (g_bNeedPose){
             g_UserGenerator.GetPoseDetectionCap().StartPoseDetection(g_strPose, nId);
         }
-        else
-        {
+        else{
             g_SkeletonCap.RequestCalibration(nId, TRUE);
         }
     }
 }
 
 // スケルトンを描画する
-void DrawSkelton(XnUserID player, int idx)
-{
+void DrawSkelton(XnUserID player, int idx){
 
     // 線を引く開始と終了のJointの定義
     XnSkeletonJoint joints[][2] = {
@@ -214,8 +192,7 @@ void DrawSkelton(XnUserID player, int idx)
     for(int i = 0; i < nJointsCount;i++){
         g_SkeletonCap.GetSkeletonJointPosition(player, joints[i][0], joint1);
         g_SkeletonCap.GetSkeletonJointPosition(player, joints[i][1], joint2);        
-        if (joint1.fConfidence < 0.2 || joint2.fConfidence < 0.2)
-        {
+        if (joint1.fConfidence < 0.2 || joint2.fConfidence < 0.2){
             return;
         }
         
@@ -272,26 +249,18 @@ int main(int argc, char **argv)
                       (*it).GetDescription().strName);
             }
         }
-        // UserGeneratorの取得
-        nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_USER, g_UserGenerator);
-        if(nRetVal!=XN_STATUS_OK){
-            nRetVal = g_UserGenerator.Create(g_Context); 
-            CHECK_RC(nRetVal, "Create user generator");
-        }
     }
     else{
         LOG_I("Reading config from: '%s'", CONFIG_XML_PATH);
         
         nRetVal = g_Context.InitFromXmlFile(CONFIG_XML_PATH, g_scriptNode, &errors);
-        if (nRetVal == XN_STATUS_NO_NODE_PRESENT)
-        {
+        if (nRetVal == XN_STATUS_NO_NODE_PRESENT){
             XnChar strError[1024];
             errors.ToString(strError, 1024);
             LOG_E("%s\n", strError);
             return (nRetVal);
         }
-        else if (nRetVal != XN_STATUS_OK)
-        {
+        else if (nRetVal != XN_STATUS_OK){
             LOG_E("Open failed: %s", xnGetStatusString(nRetVal));
             return (nRetVal);
         }
@@ -303,19 +272,17 @@ int main(int argc, char **argv)
         nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_IMAGE, g_ImageGenerator);
         CHECK_RC(nRetVal, "Find image generator");
         
-        nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_USER, g_UserGenerator);
-        if (nRetVal != XN_STATUS_OK)
-        {
-            nRetVal = g_UserGenerator.Create(g_Context);
-            CHECK_RC(nRetVal, "Find user generator");
-        }
-        
+    }
+    // UserGeneratorの取得
+    nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_USER, g_UserGenerator);
+    if(nRetVal!=XN_STATUS_OK){
+        nRetVal = g_UserGenerator.Create(g_Context); 
+        CHECK_RC(nRetVal, "Create user generator");
     }
 
     
     XnCallbackHandle hUserCallbacks, hCalibrationStart, hCalibrationComplete, hPoseDetected;
-    if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON))
-    {
+    if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_SKELETON)){
         LOG_E("%s", "Supplied user generator doesn't support skeleton");
         return 1;
     }
@@ -329,11 +296,9 @@ int main(int argc, char **argv)
     nRetVal = g_SkeletonCap.RegisterToCalibrationComplete(UserCalibration_CalibrationComplete, NULL, hCalibrationComplete);
     CHECK_RC(nRetVal, "Register to calibration complete");
     
-    if (g_SkeletonCap.NeedPoseForCalibration())
-    {
+    if (g_SkeletonCap.NeedPoseForCalibration()){
         g_bNeedPose = TRUE;
-        if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION))
-        {
+        if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION)){
             LOG_E("%s", "Pose required, but not supported");
             return 1;
         }
@@ -353,8 +318,7 @@ int main(int argc, char **argv)
     g_rgbImage = cvCreateImage(cvSize(mapMode.nXRes, mapMode.nYRes), IPL_DEPTH_8U, 3);
 
     LOG_I("%s", "Starting to run");
-    if(g_bNeedPose)
-    {
+    if(g_bNeedPose){
         LOG_I("%s", "Assume calibration pose");
     }
 
