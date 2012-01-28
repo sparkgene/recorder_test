@@ -28,8 +28,9 @@
 // Defines
 //---------------------------------------------------------------------------
 #define CONFIG_XML_PATH "./config.xml"
-#define RECORD_FILE_PATH "../../mydata.oni"
-#define MAX_NUM_USERS 10
+#define RECORD_FILE_PATH "../../skeletonrec.oni"
+//#define RECORD_FILE_PATH "../../mydata.oni"
+#define MAX_NUM_USERS 1
 
 #define USE_RECORED_DATA TRUE
 #define DO_RECORED FALSE
@@ -397,8 +398,8 @@ int main(int argc, char **argv)
         xn::SceneMetaData sceneMetaData;
         g_UserGenerator.GetUserPixels(0, sceneMetaData);
         
-        XnUserID allUsers[20];
-        XnUInt16 nUsers = 20;
+        XnUserID allUsers[MAX_NUM_USERS];
+        XnUInt16 nUsers = MAX_NUM_USERS;
         g_UserGenerator.GetUsers(allUsers, nUsers);
         for (int i = 0; i < nUsers; i++) {
             

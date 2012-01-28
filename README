@@ -1,15 +1,36 @@
-このサンプルはKinectセンサーからの入力をファイルに保存して、再生するものです。
-main.cpp::mainの以下のフラグを設定して、保存、再生を指定できます。
- bUseRecordData  (True:指定された.oniファイルを読み込んで再生します)
- bRecordData (False:Kinectセンサーからの入力を保存します)
-
-動作環境
+動作環境 (environment)
 OpenNI 1.5.2.23
 Nite 1.5.2.21
 PrimeSense Sensor 5.1.0.41
 
+このサンプルはKinectセンサーからの入力をファイルに保存して、再生するものです。
+main.cppの以下のフラグを設定して、保存、再生を指定できます。
+ USE_RECORED_DATA
+  TRUE: 指定された.oniファイルを読み込んで再生します
+ DO_RECORED
+  TRUE: Kinectセンサーからの入力を保存します
+ RECORD_FILE_PATH
+  ".oni"ファイルまでのパス
+
 OpenNIのサイトからサンプルのoniファイルをダウンロードして指定すれば、
 Kinectセンサーがなくても、サンプルを動かすことができます。
+以下のURLを開き、ドロップダウンで「ONI files」＞「SkeltonRec.oni」を選んでダウンロードして下さい。
+http://www.openni.org/Downloads/OpenNIModules.aspx
+
+
 
 This is a sample for redording kinect sensor data and play it.
+Change the flag to recored or play the recorded data.
+The flags are defined at main.cpp.
+ USE_RECORED_DATA
+  TRUE: run with specified ".oni" data file.
+ DO_RECORED
+  TRUE: run with kinect sensor.
+ RECORD_FILE_PATH
+  path to ".oni" file
+
+you can run this sample without kinect sensor by using ".oni" file.
+Download the ".oni" file from OpenNI web site.
+http://www.openni.org/Downloads/OpenNIModules.aspx
+Choose "ONI files" > "SkeltonRec.oni"
 
