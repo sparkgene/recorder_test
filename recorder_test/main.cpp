@@ -28,8 +28,11 @@
 // Defines
 //---------------------------------------------------------------------------
 #define CONFIG_XML_PATH "./config.xml"
-#define RECORD_FILE_PATH "../../skeletonrec.oni"
+#define RECORD_FILE_PATH "../../mydata.oni"
 #define MAX_NUM_USERS 10
+
+#define USE_RECORED_DATA TRUE
+#define DO_RECORED FALSE
 
 //---------------------------------------------------------------------------
 // Globals
@@ -39,11 +42,23 @@ xn::ScriptNode g_scriptNode;
 xn::DepthGenerator g_DepthGenerator;
 xn::UserGenerator g_UserGenerator;
 xn::ImageGenerator g_ImageGenerator;
+xn::SkeletonCapability g_SkeletonCap = NULL;
 IplImage *g_rgbImage = NULL;
 
 
 XnBool g_bNeedPose = FALSE;
 XnChar g_strPose[20] = "";
+
+CvScalar g_Colors[] =
+{
+	CV_RGB(255,255,255),
+	CV_RGB(255,0,0),
+	CV_RGB(0,255,0),
+	CV_RGB(0,0,255),
+	CV_RGB(0,255,255),
+	CV_RGB(255,0,255),
+	CV_RGB(255,255,0),
+};
 
 
 //---------------------------------------------------------------------------
@@ -107,7 +122,7 @@ void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& generator, XnUserID nId, v
     }
     else
     {
-        g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+        g_SkeletonCap.RequestCalibration(nId, TRUE);
     }
 }
 // Callback: An existing user was lost
@@ -124,7 +139,7 @@ void XN_CALLBACK_TYPE UserPose_PoseDetected(xn::PoseDetectionCapability& capabil
     xnOSGetEpochTime(&epochTime);
     LOG_D("%d Pose %s detected for user %d", epochTime, strPose, nId);
     g_UserGenerator.GetPoseDetectionCap().StopPoseDetection(nId);
-    g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+    g_SkeletonCap.RequestCalibration(nId, TRUE);
 }
 // Callback: Started calibration
 void XN_CALLBACK_TYPE UserCalibration_CalibrationStart(xn::SkeletonCapability& capability, XnUserID nId, void* pCookie)
@@ -142,7 +157,7 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
     {
         // Calibration succeeded
         LOG_D("%d Calibration complete, start tracking user %d", epochTime, nId);		
-        g_UserGenerator.GetSkeletonCap().StartTracking(nId);
+        g_SkeletonCap.StartTracking(nId);
     }
     else
     {
@@ -159,21 +174,72 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationComplete(xn::SkeletonCapability
         }
         else
         {
-            g_UserGenerator.GetSkeletonCap().RequestCalibration(nId, TRUE);
+            g_SkeletonCap.RequestCalibration(nId, TRUE);
         }
     }
+}
+
+// スケルトンを描画する
+void DrawSkelton(XnUserID player, int idx)
+{
+
+    // 線を引く開始と終了のJointの定義
+    XnSkeletonJoint joints[][2] = {
+        {XN_SKEL_HEAD, XN_SKEL_NECK},
+        {XN_SKEL_NECK, XN_SKEL_LEFT_SHOULDER},
+        {XN_SKEL_LEFT_SHOULDER, XN_SKEL_LEFT_ELBOW},
+        {XN_SKEL_LEFT_ELBOW, XN_SKEL_LEFT_HAND},
+        {XN_SKEL_NECK, XN_SKEL_RIGHT_SHOULDER},
+        {XN_SKEL_RIGHT_SHOULDER, XN_SKEL_RIGHT_ELBOW},
+        {XN_SKEL_RIGHT_ELBOW, XN_SKEL_RIGHT_HAND},
+        {XN_SKEL_LEFT_SHOULDER, XN_SKEL_TORSO},
+        {XN_SKEL_RIGHT_SHOULDER, XN_SKEL_TORSO},
+        {XN_SKEL_TORSO, XN_SKEL_LEFT_HIP},
+        {XN_SKEL_LEFT_HIP, XN_SKEL_LEFT_KNEE},
+        {XN_SKEL_LEFT_KNEE, XN_SKEL_LEFT_FOOT},
+        {XN_SKEL_TORSO, XN_SKEL_RIGHT_HIP},
+        {XN_SKEL_RIGHT_HIP, XN_SKEL_RIGHT_KNEE},
+        {XN_SKEL_RIGHT_KNEE, XN_SKEL_RIGHT_FOOT},
+        {XN_SKEL_LEFT_HIP, XN_SKEL_RIGHT_HIP}
+    };
+
+	XnSkeletonJointPosition joint1, joint2;
+    int nJointsCount = sizeof(joints) / sizeof(joints[0]);
+    int color_idx = idx;
+    if( color_idx > (sizeof(g_Colors) / sizeof(g_Colors[0])) ){
+        color_idx = (sizeof(g_Colors) / sizeof(g_Colors[0])) - 1;
+    }
+       
+    for(int i = 0; i < nJointsCount;i++){
+        g_SkeletonCap.GetSkeletonJointPosition(player, joints[i][0], joint1);
+        g_SkeletonCap.GetSkeletonJointPosition(player, joints[i][1], joint2);        
+        if (joint1.fConfidence < 0.2 || joint2.fConfidence < 0.2)
+        {
+            return;
+        }
+        
+        XnPoint3D pt[2];
+        pt[0] = joint1.position;
+        pt[1] = joint2.position;
+        
+        g_DepthGenerator.ConvertRealWorldToProjective(2, pt, pt);
+        
+        // 線で結んで
+        cvLine( g_rgbImage, cvPoint(pt[0].X, pt[0].Y), cvPoint(pt[1].X, pt[1].Y), g_Colors[color_idx], 1, CV_AA);
+        // それぞれの点を塗りつぶす
+        cvCircle(g_rgbImage, cvPoint(pt[0].X, pt[0].Y), 2, g_Colors[color_idx], -1, CV_AA, 0);
+        cvCircle(g_rgbImage, cvPoint(pt[1].X, pt[1].Y), 2, g_Colors[color_idx], -1, CV_AA, 0);
+    }
+    
 }
 
 
 int main(int argc, char **argv)
 {
-    bool bUseRecordData = true;
-    bool bRecordData = false;
-
     XnStatus nRetVal = XN_STATUS_OK;
     xn::EnumerationErrors errors;
     
-    if( bUseRecordData ){
+    if( USE_RECORED_DATA ){
         g_Context.Init();
         g_Context.OpenFileRecording(RECORD_FILE_PATH);
         xn::Player player;
@@ -254,12 +320,15 @@ int main(int argc, char **argv)
     }
     nRetVal = g_UserGenerator.RegisterUserCallbacks(User_NewUser, User_LostUser, NULL, hUserCallbacks);
     CHECK_RC(nRetVal, "Register to user callbacks");
-    nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationStart(UserCalibration_CalibrationStart, NULL, hCalibrationStart);
+
+    g_SkeletonCap = g_UserGenerator.GetSkeletonCap();
+    nRetVal = g_SkeletonCap.RegisterToCalibrationStart(UserCalibration_CalibrationStart, NULL, hCalibrationStart);
     CHECK_RC(nRetVal, "Register to calibration start");
-    nRetVal = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationComplete(UserCalibration_CalibrationComplete, NULL, hCalibrationComplete);
+
+    nRetVal = g_SkeletonCap.RegisterToCalibrationComplete(UserCalibration_CalibrationComplete, NULL, hCalibrationComplete);
     CHECK_RC(nRetVal, "Register to calibration complete");
     
-    if (g_UserGenerator.GetSkeletonCap().NeedPoseForCalibration())
+    if (g_SkeletonCap.NeedPoseForCalibration())
     {
         g_bNeedPose = TRUE;
         if (!g_UserGenerator.IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION))
@@ -269,17 +338,13 @@ int main(int argc, char **argv)
         }
         nRetVal = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseDetected(UserPose_PoseDetected, NULL, hPoseDetected);
         CHECK_RC(nRetVal, "Register to Pose Detected");
-        g_UserGenerator.GetSkeletonCap().GetCalibrationPose(g_strPose);
+        g_SkeletonCap.GetCalibrationPose(g_strPose);
     }
     
-    g_UserGenerator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+    g_SkeletonCap.SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
     
     nRetVal = g_Context.StartGeneratingAll();
     CHECK_RC(nRetVal, "StartGenerating");
-    
-    XnUserID aUsers[MAX_NUM_USERS];
-    XnUInt16 nUsers;
-    XnSkeletonJointTransformation torsoJoint;
     
     // 表示用の画像データの作成
     XnMapOutputMode mapMode;
@@ -293,7 +358,7 @@ int main(int argc, char **argv)
     }
 
     xn::Recorder recorder;
-    if( bRecordData && !bUseRecordData ){
+    if( DO_RECORED && !USE_RECORED_DATA ){
         // レコーダーの作成
         LOG_I("%s", "Setup Recorder");
         nRetVal = recorder.Create(g_Context);
@@ -315,7 +380,7 @@ int main(int argc, char **argv)
     while (!xnOSWasKeyboardHit())
     {
         g_Context.WaitOneUpdateAll(g_UserGenerator);
-        if( bRecordData  && !bUseRecordData ){
+        if( DO_RECORED  && !USE_RECORED_DATA ){
             nRetVal = recorder.Record();
             CHECK_RC(nRetVal, "Record");
         }
@@ -327,37 +392,39 @@ int main(int argc, char **argv)
         xnOSMemCopy(g_rgbImage->imageData, imageMetaData.RGB24Data(), g_rgbImage->imageSize);
         // BGRからRGBに変換して表示
         cvCvtColor(g_rgbImage, g_rgbImage, CV_RGB2BGR);
-        cvShowImage("Video View", g_rgbImage);
 
-        nUsers=MAX_NUM_USERS;
-        g_UserGenerator.GetUsers(aUsers, nUsers);
-
-/*
-        for(XnUInt16 i=0; i<nUsers; i++)
-        {
-            if(g_UserGenerator.GetSkeletonCap().IsTracking(aUsers[i])==FALSE)
-                continue;
+        // UserGeneratorからユーザー識別ピクセルを取得
+        xn::SceneMetaData sceneMetaData;
+        g_UserGenerator.GetUserPixels(0, sceneMetaData);
+        
+        XnUserID allUsers[20];
+        XnUInt16 nUsers = 20;
+        g_UserGenerator.GetUsers(allUsers, nUsers);
+        for (int i = 0; i < nUsers; i++) {
             
-            g_UserGenerator.GetSkeletonCap().GetSkeletonJoint(aUsers[i],XN_SKEL_TORSO,torsoJoint);
-            LOG_D("user %d: head at (%6.2f,%6.2f,%6.2f)\n",aUsers[i],
-                   torsoJoint.position.position.X,
-                   torsoJoint.position.position.Y,
-                   torsoJoint.position.position.Z);
-            // 最初の一人だけスケルトン表示する
-            break;
+            // キャリブレーションに成功しているかどうか
+            if (g_SkeletonCap.IsTracking(allUsers[i])) {
+                // スケルトンを描画
+                DrawSkelton(allUsers[i], i);
+            }
         }
-*/
+        
+        // 表示
+        cvShowImage("User View", g_rgbImage);
+
         // ESCもしくはqが押されたら終了させる
         if (cvWaitKey(10) == 27) {
             break;
         }
     }
-/*
-    g_scriptNode.Release();
+
+    if( !USE_RECORED_DATA ){
+        g_scriptNode.Release();
+    }
     g_DepthGenerator.Release();
     g_UserGenerator.Release();
     g_Context.Release();
-*/
+
 	if (g_rgbImage != NULL) {
 		cvReleaseImage(&g_rgbImage);	
 	}
