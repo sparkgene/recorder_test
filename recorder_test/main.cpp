@@ -245,7 +245,7 @@ int main(int argc, char **argv)
         g_Context.OpenFileRecording(RECORD_FILE_PATH);
         xn::Player player;
         
-        // DepthGeneratorの取得
+        // Player nodeの取得
         nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_PLAYER, player);
         CHECK_RC(nRetVal, "Find player");
         
@@ -258,12 +258,12 @@ int main(int argc, char **argv)
             
             if( (*it).GetDescription().Type == XN_NODE_TYPE_IMAGE ){
                 nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_IMAGE, g_ImageGenerator);
-                CHECK_RC(nRetVal, "Find image generator");
+                CHECK_RC(nRetVal, "Find image node");
                 LOG_D("%s", "ImageGenerator created.");
             }
             else if( (*it).GetDescription().Type == XN_NODE_TYPE_DEPTH ){
                 nRetVal = g_Context.FindExistingNode(XN_NODE_TYPE_DEPTH, g_DepthGenerator);
-                CHECK_RC(nRetVal, "Find depth generator");
+                CHECK_RC(nRetVal, "Find depth node");
                 LOG_D("%s", "DepthGenerator created.");            
             }
             else{
